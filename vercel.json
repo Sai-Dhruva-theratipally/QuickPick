@@ -1,18 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "cd api && npm install && cd ../client && npm install && npm run build",
-  "outputDirectory": "client/dist",
-  "serverlessFunctionRegion": "iad1",
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 30,
-      "memory": 1024
-    }
-  },
+  "buildCommand": "npm install --prefix api && npm install --prefix client && npm run build --prefix client",
+  "outputDirectory": "./client/dist",
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
