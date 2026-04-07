@@ -18,14 +18,17 @@ const port = process.env.PORT || 4000;
 await connectDB()
 await connectCloudinary()
 
-// Allow multiple origins
-const allowedOrigins = ['http://localhost:5173', '']
+// Allow multiple origins (read from CLIENT_URLS env var or fallback to localhost)
+const allowedOrigins = (process.env.CLIENT_URLS || 'http://localhost:5173')
+    .split(',')
+    .map(u => u.trim())
+    .filter(Boolean);
 
 
 // Middleware configuration
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({origin: allowedOrigins, credentials: true}));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 
 app.get('/', (req, res) => res.send("API is Working"));
