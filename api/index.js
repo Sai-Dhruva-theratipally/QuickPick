@@ -14,9 +14,37 @@ import chatRouter from '../server/routes/chatRoute.js';
 
 const app = express();
 
-// Initialize connections
-await connectDB();
-await connectCloudinary();
+let dbConnected = false;
+let cloudinaryConnected = false;
+
+// Initialize connections once
+async function initializeConnections() {
+  if (!dbConnected) {
+    try {
+      await connectDB();
+      dbConnected = true;
+      console.log('Database connected');
+    } catch (error) {
+      console.error('Database connection error:', error);
+    }
+  }
+  
+  if (!cloudinaryConnected) {
+    try {
+      await connectCloudinary();
+      cloudinaryConnected = true;
+      console.log('Cloudinary connected');
+    } catch (error) {
+      console.error('Cloudinary connection error:', error);
+    }
+  }
+}
+
+// Initialize connections on first request
+app.use(async (req, res, next) => {
+  await initializeConnections();
+  next();
+});
 
 // Allow multiple origins (read from CLIENT_URLS env var or fallback to localhost)
 const allowedOrigins = (process.env.CLIENT_URLS || 'http://localhost:5173')
@@ -40,5 +68,11 @@ app.use('/api/cart', cartRouter);
 app.use('/api/address', addressRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/chat', chatRouter);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: err.message || 'Internal Server Error' });
+});
 
 export default app;
